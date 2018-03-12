@@ -1,0 +1,7 @@
+<h1>Welcome to Candy Crush Mega!</h1>
+
+<div id="indexPage">
+  <label for="gameName">Game Name</label>
+  <input id="gameName" />
+  <button id="gameJoinBtn">Join Now</button>
+</div>
