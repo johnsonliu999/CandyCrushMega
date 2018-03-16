@@ -1,43 +1,97 @@
 defmodule CandyCrushMega.Game do
-  use Agent
+  use Agent, restart: :temporary
 
   @size 4
   @red "*"
   @blue "/"
-  @green "."
-  @yellow ","
+  @green "+"
+  @yellow "-"
   @tiles [@blue, @green, @yellow, @red]
 
   defstruct [
     winner: nil,
     cur_player: nil, # ids or token
-    players: [], # two player_ids
+    player1: nil, # %{id: :id(), score: :int()}
+    player2: nil,
     spectators: [], # ids
     over: false,
     board: %{}, # %{index => '*'}
     messages: [] # list of {id, msg}
   ]
 
+  ### game part
   @doc"""
   return {"ok", game_pid}
   """
-  def create() do
-    #Agent.start_link(fn -> )
+  def create(game_name) do
+    Agent.start_link(fn -> %__MODULE__{} end, name: ref(game_name))
   end
 
-  def destroy() do
-    Agent.stop
+  def destroy(game_name) do
+    Agent.stop(ref(game_name))
+  end
+
+  def get(game_name), do: Agent.get(ref(game_name), fn game -> game end)
+
+  def update(game_name, game) do
+    Agent.update(ref(game_name), fn -> game end)
+  end
+
+  defp ref(game_name), do: {:global, {:game, game_name}}
+
+  ### player part
+  # simply add user_id per the game
+  # return {:stateus(), :game()}
+  def join(game, user_id) do
+    cond do
+      !game.player1 -> {:player1, %__MODULE__{game | player1: %{id: user_id, score: 0}}}
+      !game.player2 -> {:player2, %__MODULE__{game | player2: %{id: user_id, socre: 0}}}
+      true -> {:spectator, %__MODULE__{game | spectators: [user_id | game.spectators]}}
+    end
+  end
+
+
+  ### board part
+  # must guarantee index, inde2 is adjacent
+  # return : {new_board :map(), matched :list()}
+  def move(board, index1, index2) do
+    {new_board, matched} =
+      board
+      |> Map.put(index1, board[index2])
+      |> Map.put(index2, board[index1])
+      |> remove_match
+    if matched != [] do
+      new_board =
+        new_board
+        |> drop_down
+        |> fill_board
+    end
+    {new_board, matched}
+  end
+
+  def any_valid_move?(board) do
+    0..@size-2
+    |> Enum.any?(fn i ->
+      0..@size-2
+      |> Enum.any?(fn j ->
+        {_, matched1} = board |> move({i,j} |> cor2ind, {i,j+1} |> cor2ind)
+        {_, matched2} = board |> move({i,j} |> cor2ind, {i+1,j} |> cor2ind)
+        matched1 != [] || matched2 != []
+      end)
+    end)
   end
 
 
   def new_board do
-    0..@size-1
-    |> Enum.reduce(%{}, fn i, acc ->
+    board =
       0..@size-1
-      |> Enum.reduce(acc, fn j, acc ->
-        Map.put(acc, cor2ind({i,j}), gen_tile(acc, {i,j}))
+      |> Enum.reduce(%{}, fn i, acc ->
+        0..@size-1
+        |> Enum.reduce(acc, fn j, acc ->
+          Map.put(acc, cor2ind({i,j}), gen_tile(acc, {i,j}))
+        end)
       end)
-    end)
+      if !any_valid_move?(board), do: new_board, else: board
   end
 
   # fill nil entry of the board with random tiles

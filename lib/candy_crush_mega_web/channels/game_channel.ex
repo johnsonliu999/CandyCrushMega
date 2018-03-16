@@ -5,10 +5,29 @@ defmodule CandyCrushMegaWeb.GameChannel do
   def join("game:" <> game_name, payload, socket) do
     if authorized?(payload) do
       socket = assign(socket, :game_name, game_name)
-      {:ok, %{game: Game.new_board}, socket}
+      if :global.whereis_name({:game, game_name}) == :undefined do
+        Game.create(game_name)
+      end
+      {role, game} = Game.join(Game.get(game_name), socket.assigns.user_id)
+      user_id = socket.assigns.user_id
+      case role do
+        :player1 -> {:player1, %{user_id: user_id}}
+        :player2 ->
+          game = %{game | board: Game.new_board}
+          broadcast_from socket, "player2_join", %{game: game}
+          {:player2, %{user_id: user_id, game: game}}
+        :spectator ->
+          broadcast_from socket, "spectator_join", %{spectator: game.spectators}
+          {:spectator, %{game: game}}
+      end
     else
       {:error, %{reason: "unauthorized"}}
     end
+  end
+
+  # return %{board, score}
+  def handle_in("move", payload, socket) do
+
   end
 
   # Channels can be used in a request/response fashion

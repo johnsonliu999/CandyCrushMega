@@ -10,13 +10,15 @@ defmodule CandyCrushMega.Application do
     children = [
       # Start the endpoint when the application starts
       supervisor(CandyCrushMegaWeb.Endpoint, []),
+      worker(CandyCrushMega.UserIdGenerator, []),
+      {DynamicSupervisor, name: CandyCrushMega.GameSupervisor, strategy: :one_for_one}
       # Start your own worker by calling: CandyCrushMega.Worker.start_link(arg1, arg2, arg3)
       # worker(CandyCrushMega.Worker, [arg1, arg2, arg3]),
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: CandyCrushMega.Supervisor]
+    opts = [strategy: :one_for_all, name: CandyCrushMega.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
