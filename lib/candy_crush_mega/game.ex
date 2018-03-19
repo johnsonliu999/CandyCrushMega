@@ -1,15 +1,18 @@
 defmodule CandyCrushMega.Game do
   use Agent, restart: :temporary
 
-  @size 4
+  @size 5
   @red "*"
   @blue "/"
   @green "+"
   @yellow "-"
   @tiles [@blue, @green, @yellow, @red]
 
+  @goal 200
+
   defstruct [
     winner: nil,
+    goal: @goal,
     cur_player: nil, # ids or token
     player1: nil, # %{id: :id(), score: :int()}
     player2: nil,
@@ -34,39 +37,62 @@ defmodule CandyCrushMega.Game do
   def get(game_name), do: Agent.get(ref(game_name), fn game -> game end)
 
   def update(game_name, game) do
-    Agent.update(ref(game_name), fn -> game end)
+    Agent.update(ref(game_name), fn _ -> game end)
   end
 
   defp ref(game_name), do: {:global, {:game, game_name}}
 
   ### player part
   # simply add user_id per the game
+  # however, if p2, then create new board
   # return {:stateus(), :game()}
   def join(game, user_id) do
     cond do
-      !game.player1 -> {:player1, %__MODULE__{game | player1: %{id: user_id, score: 0}}}
-      !game.player2 -> {:player2, %__MODULE__{game | player2: %{id: user_id, socre: 0}}}
-      true -> {:spectator, %__MODULE__{game | spectators: [user_id | game.spectators]}}
+      !game.player1 -> {:player1, %{game | player1: %{id: user_id, score: 0}}}
+      !game.player2 -> {:player2, game
+        |> Map.put(:player2, %{id: user_id, score: 0})
+        |> Map.put(:board, new_board)
+        |> Map.put(:cur_player, game.player1.id)}
+      true -> {:spectator, %{game | spectators: [user_id | game.spectators]}}
     end
   end
 
+  def swith_player(game) do
+    if game.cur_player == game.player1.id do
+      %{game | cur_player: game.player2.id}
+    else
+      %{game | cur_player: game.player1.id}
+    end
+  end
+
+  # update the game's players' score accroding to the length of matched tiles
+  def update_score(game, matched) do
+    cur_player = game.cur_player
+    cur_score = length(matched)
+    player = if cur_player == game.player1.id, do: :player1, else: :player2
+    new_score = Map.get(game, player).score + length(matched)
+    game = %{game | player => %{Map.get(game, player) | score: new_score}}
+    if new_score >= @goal do
+      game |> Map.put(:winner, game[player].id)
+    else
+      game
+    end
+  end
 
   ### board part
   # must guarantee index, inde2 is adjacent
-  # return : {new_board :map(), matched :list()}
+  # return : board :map()
   def move(board, index1, index2) do
-    {new_board, matched} =
       board
       |> Map.put(index1, board[index2])
       |> Map.put(index2, board[index1])
-      |> remove_match
-    if matched != [] do
-      new_board =
-        new_board
-        |> drop_down
-        |> fill_board
-    end
-    {new_board, matched}
+  end
+
+  # given a board, contains matches,
+  # return : {new_board :map(), matched :list()}
+  def match_once(board) do
+    {new_board, matched} = board |> remove_match
+    {new_board |> drop_down |> fill_board, matched}
   end
 
   def any_valid_move?(board) do
@@ -74,8 +100,8 @@ defmodule CandyCrushMega.Game do
     |> Enum.any?(fn i ->
       0..@size-2
       |> Enum.any?(fn j ->
-        {_, matched1} = board |> move({i,j} |> cor2ind, {i,j+1} |> cor2ind)
-        {_, matched2} = board |> move({i,j} |> cor2ind, {i+1,j} |> cor2ind)
+        {_, matched1} = board |> move({i,j} |> cor2ind, {i,j+1} |> cor2ind) |> match_once
+        {_, matched2} = board |> move({i,j} |> cor2ind, {i+1,j} |> cor2ind) |> match_once
         matched1 != [] || matched2 != []
       end)
     end)
@@ -189,5 +215,15 @@ defmodule CandyCrushMega.Game do
     end
   end
 
-  defp ind2cor(ind), do: {ind / @size, rem(ind, @size)}
+  defp ind2cor(ind), do: {div(ind, @size), rem(ind, @size)}
+
+  # check if valid indices and adjacent
+  def valid_indices?(index1, index2) do
+    {i1, j1} = index1 |> ind2cor
+    {i2, j2} = index2 |> ind2cor
+    i1 >= 0 && i1 < @size && i2 >= 0 && i2 < @size &&
+    j1 >= 0 && j1 < @size && j2 >= 0 && j2 < @size &&
+    ((abs(i1-i2) == 1 && j1 == j2) ||
+    (abs(j1-j2) == 1 && i1 == i2))
+  end
 end

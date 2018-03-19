@@ -24,7 +24,7 @@ defmodule CandyCrushMega.Test do
   @size 4
 
   def main do
-    test_any_valid
+    test_move(@test2)
   end
 
   def test_any_valid do
@@ -45,6 +45,12 @@ defmodule CandyCrushMega.Test do
     IO.inspect matched, label: "matched"
   end
 
+  def test_valid_indices() do
+    IO.puts Game.valid_indices?(3,4)
+    IO.puts Game.valid_indices?(3,8)
+    IO.puts Game.valid_indices?(3,6)
+  end
+
 
   def print(board) do
     for i <- 0..@size-1 do
@@ -54,3 +60,5 @@ defmodule CandyCrushMega.Test do
     end
   end
 end
+
+CandyCrushMega.Test.main
