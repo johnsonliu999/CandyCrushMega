@@ -1,12 +1,13 @@
 defmodule CandyCrushMegaWeb.GameChannel do
   use CandyCrushMegaWeb, :channel
   alias CandyCrushMega.Game
+  alias CandyCrushMega.GameSupervisor
 
   def join("game:" <> game_name, payload, socket) do
     if authorized?(payload) do
       socket = assign(socket, :game_name, game_name)
       if :global.whereis_name({:game, game_name}) == :undefined do
-        Game.create(game_name)
+        DynamicSupervisor.start_child(GameSupervisor, {Game, game_name})
       end
       {role, game} = Game.join(Game.get(game_name), socket.assigns.user_id)
       user_id = socket.assigns.user_id
@@ -103,6 +104,17 @@ defmodule CandyCrushMegaWeb.GameChannel do
   def handle_in("shout", payload, socket) do
     broadcast socket, "shout", payload
     {:noreply, socket}
+  end
+
+  def terminate({:shutdown, reason}, socket) do
+    user_id = socket.assigns.user_id
+    game_name = socket.assigns.game_name
+    game = Game.get(game_name)
+    if user_id == game.player1.id || user_id == game.player2.id do
+      Game.destroy(game_name)
+      broadcast socket, "game_over", %{reason: "Player left"}
+      {:stop, :normal, socket}
+    end
   end
 
   # Add authorization logic here as required.

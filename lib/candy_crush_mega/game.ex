@@ -1,7 +1,7 @@
 defmodule CandyCrushMega.Game do
   use Agent, restart: :temporary
 
-  @size 5
+  @size 9
   @red "*"
   @blue "/"
   @green "+"
@@ -13,6 +13,7 @@ defmodule CandyCrushMega.Game do
   defstruct [
     winner: nil,
     goal: @goal,
+    size: @size,
     cur_player: nil, # ids or token
     player1: nil, # %{id: :id(), score: :int()}
     player2: nil,
@@ -23,6 +24,10 @@ defmodule CandyCrushMega.Game do
   ]
 
   ### game part
+  def start_link(game_name) do
+    create(game_name)
+  end
+
   @doc"""
   return {"ok", game_pid}
   """

@@ -9,6 +9,7 @@ export default class Game extends Component {
     this.state = {
       winner: null,
       goal: null,
+      size: null,
       userId: null,
       player1: {id: -1, score: 0}, // player_id
       player2: {id: -1, score: 0}, // player_id
@@ -96,7 +97,8 @@ export default class Game extends Component {
       goal: game.goal,
       messages: game.messages,
       spectators: game.spectators,
-      valid: this.state.userId == game.cur_player
+      valid: this.state.userId == game.cur_player,
+      size: game.size
     });
   }
 
@@ -106,7 +108,7 @@ export default class Game extends Component {
     const {index1, index2} = this.state;
     if (!index1) this.setState({index1 : index})
     else {
-      if (!this._isValid(index1, index)) {
+      if (!this._isValid(this.state.size, index1, index)) {
         this.setState({index1: null, index2: null});
         return ;
       }
@@ -117,11 +119,11 @@ export default class Game extends Component {
     }
   }
 
-  _isValid(index1, index2) {
-    const i1 = Math.floor(index1 / SIZE);
-    const j1 = index1 % SIZE;
-    const i2 = Math.floor(index2 / SIZE);
-    const j2 = index2 % SIZE;
+  _isValid(size, index1, index2) {
+    const i1 = Math.floor(index1 / size);
+    const j1 = index1 % size;
+    const i2 = Math.floor(index2 / size);
+    const j2 = index2 % size;
     console.log(i1, i2, j1, j2);
     return Math.abs(i1-i2) == 1 && j1 == j2
           || Math.abs(j1-j2) == 1 && i1 == i2;
@@ -131,22 +133,21 @@ export default class Game extends Component {
   render() {
     return (
       <div>
-          {/*<Status
-            opponent={this.state.opponent}
-            player={this.state.player}
-            winner={this.state.winner}
-             />*/
-             // TODO: status
-           }
-             { this.state.board ?
-               <Board
-                 board={this.state.board}
-                 handleClick={this.handleClick}
-                 index1={this.state.index1}
-                 index2={this.state.index2}
-                 matched={this.state.matched}
-                 />
-               : <div>Waiting for opponent...</div>}
+        { this.state.board ?
+          <div>
+            {this.state.valid ?
+              <p className="text-success">Your Turn</p> :
+                <p className="text-danger">Opponent's Turn</p>}
+           <Board
+             board={this.state.board}
+             size={this.state.size}
+             handleClick={this.handleClick}
+             index1={this.state.index1}
+             index2={this.state.index2}
+             matched={this.state.matched}
+             />
+         </div>
+           : <div>Waiting for opponent...</div>}
           {
             // TODO: chat room
           }
