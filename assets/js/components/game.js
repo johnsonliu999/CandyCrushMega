@@ -1,7 +1,25 @@
 import React, {Component} from "react"
 import Board from "./board"
+import States from './states'
+import ChatRoom from './chat-room'
 
-const SIZE = 5;
+const WinnerModal = () => (
+  <div className="modal fade" id="winnerModal"
+    tabIndex="-1" role="dialog">
+    <div className="modal-dialog" role="document">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title">Game Over</h5>
+          <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div className="modal-body" id="winnerModalBody">
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 export default class Game extends Component {
   constructor(props) {
@@ -38,7 +56,7 @@ export default class Game extends Component {
 
     channel.on("player2_join", data => this._initGame(data.game));
     channel.on("spectator_join", data => this.setState({spectators: data.spectators}));
-    channel.on("message", data => {this.setState({spectators: data.messages})});
+    channel.on("message", data => {this.setState({messages: data.messages})});
 
     channel.on("turn:move", data => this.setState({
       board: data.board, index1: data.index1, index2: data.index2
@@ -62,14 +80,21 @@ export default class Game extends Component {
       this.setState({board: data.board, index1: null, index2: null})
       if (data.cur_player == this.state.userId) this.setState({valid:true});
     });
-    channel.on("game_over", data => this.setState({winner: data.winner, valid: false}));
+    channel.on("game_over", data => {
+      this.setState({winner: data.winner, valid: false});
+      const content = "You " + (this.state.userId == data.winner ? "win" : "lose")
+                      + " the game.";
+      $('#winnerModalBody').text(content);
+      $('#winnerModal').modal();
+
+    });
 
     channel.join()
-            .receive("ok", data => {
-              console.log("Join succeed", data);
-              this.setState({userId: data.user_id})
-              if (data.role == "player2" || data.role == "spectator")
-                this._initGame(data.game);
+    .receive("ok", data => {
+      console.log("Join succeed", data);
+      this.setState({userId: data.user_id})
+      if (data.role == "player2" || data.role == "spectator")
+      this._initGame(data.game);
             })
             .receive("error", resp => console.log("Unable to join", resp));
   }
@@ -131,21 +156,54 @@ export default class Game extends Component {
   }
 
   render() {
+
+    const {player1, player2, userId, valid, goal, winner} = this.state;
+
+    let player = null;
+    let opponent = null;
+    let sp_mode = false;
+
+    if (userId == player1.id) {
+      player = player1;
+      opponent = player2;
+    } else if (userId == player2.id) {
+      player = player2;
+      opponent = player1;
+    } else {
+      player = player1;
+      opponent = player2;
+      sp_mode = true;
+    }
+
     return (
       <div>
         { this.state.board ?
           <div>
+            <WinnerModal userId={userId} winner={winner} />
+            <States player={player} opponent={opponent} sp_mode={sp_mode}
+              goal={goal} valid={valid}/>
             {this.state.valid ?
               <p className="text-success">Your Turn</p> :
                 <p className="text-danger">Opponent's Turn</p>}
-           <Board
-             board={this.state.board}
-             size={this.state.size}
-             handleClick={this.handleClick}
-             index1={this.state.index1}
-             index2={this.state.index2}
-             matched={this.state.matched}
-             />
+          <div className="row">
+            <div className="col-8">
+               <Board
+                 board={this.state.board}
+                 size={this.state.size}
+                 handleClick={this.handleClick}
+                 index1={this.state.index1}
+                 index2={this.state.index2}
+                 matched={this.state.matched}
+                 />
+             </div>
+             <div className="col-4">
+               <ChatRoom
+                 userId={this.state.userId}
+                 messages={this.state.messages}
+                 channel={this.state.channel}
+                 />
+             </div>
+           </div>
          </div>
            : <div>Waiting for opponent...</div>}
           {

@@ -8,7 +8,7 @@ defmodule CandyCrushMega.Game do
   @yellow "-"
   @tiles [@blue, @green, @yellow, @red]
 
-  @goal 200
+  @goal 50
 
   defstruct [
     winner: nil,
@@ -78,7 +78,7 @@ defmodule CandyCrushMega.Game do
     new_score = Map.get(game, player).score + length(matched)
     game = %{game | player => %{Map.get(game, player) | score: new_score}}
     if new_score >= @goal do
-      game |> Map.put(:winner, game[player].id)
+      game |> Map.put(:winner, Map.get(game, player).id)
     else
       game
     end

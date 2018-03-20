@@ -21,10 +21,8 @@ export default class Board extends Component {
     }
 
     return (
-      <div className="board">
-        <div className="row">
-          {disp}
-        </div>
+      <div className="board row">
+        {disp}
       </div>
     );
   }

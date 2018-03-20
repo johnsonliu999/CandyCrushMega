@@ -93,6 +93,16 @@ defmodule CandyCrushMegaWeb.GameChannel do
     {:noreply, socket}
   end
 
+  # payload like %{user_id :int(), content: :string()}
+  def handle_in("message", payload, socket) do
+    game_name = socket.assigns.game_name
+    game = Game.get(game_name)
+    messages = [payload | game.messages]
+    Game.update(game_name, %{game | messages: messages})
+    broadcast socket, "message", %{messages: messages}
+    {:noreply, socket}
+  end
+
   # Channels can be used in a request/response fashion
   # by sending replies to requests from the client
   def handle_in("ping", payload, socket) do

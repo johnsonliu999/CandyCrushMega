@@ -22,6 +22,7 @@ import socket from "./socket"
 import ReactDom from "react-dom"
 import React from 'react'
 import Game from './components/game'
+import 'bootstrap'
 
 function init() {
   /*$('#gameBtn').click(() => {
