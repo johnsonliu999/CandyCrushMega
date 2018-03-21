@@ -2,7 +2,7 @@
 
 export PORT=5102
 export MIX_ENV=prod
-export GIT_PATH=/home/pokemon_crush/src/pokemon_crush
+export GIT_PATH=/home/candy_crush_mega/src/candy_crush_mega
 
 PWD=`pwd`
 if [ $PWD != $GIT_PATH ]; then
@@ -11,8 +11,8 @@ if [ $PWD != $GIT_PATH ]; then
 	exit 1
 fi
 
-if [ $USER != "pokemon_crush" ]; then
-	echo "Error: must run as user 'pokemon_crush'"
+if [ $USER != "candy_crush_mega" ]; then
+	echo "Error: must run as user 'candy_crush_mega'"
 	echo "  Current user is $USER"
 	exit 2
 fi
@@ -27,17 +27,17 @@ mkdir -p ~/www
 mkdir -p ~/old
 
 NOW=`date +%s`
-if [ -d ~/www/pokemon_crush ]; then
-	echo mv ~/www/pokemon_crush ~/old/$NOW
-	mv ~/www/pokemon_crush ~/old/$NOW
+if [ -d ~/www/candy_crush_mega ]; then
+	echo mv ~/www/candy_crush_mega ~/old/$NOW
+	mv ~/www/candy_crush_mega ~/old/$NOW
 fi
 
-mkdir -p ~/www/pokemon_crush
-REL_TAR=~/src/pokemon_crush/_build/prod/rel/pokemon_crush/releases/0.0.1/pokemon_crush.tar.gz
-(cd ~/www/pokemon_crush && tar xzvf $REL_TAR)
+mkdir -p ~/www/candy_crush_mega
+REL_TAR=~/src/candy_crush_mega/_build/prod/rel/candy_crush_mega/releases/0.0.1/candy_crush_mega.tar.gz
+(cd ~/www/candy_crush_mega && tar xzvf $REL_TAR)
 
 crontab - <<CRONTAB
-@reboot bash /home/pokemon_crush/src/pokemon_crush/start.sh
+@reboot bash /home/candy_crush_mega/src/candy_crush_mega/start.sh
 CRONTAB
 
 #. start.sh
