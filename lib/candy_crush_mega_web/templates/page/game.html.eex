@@ -1,3 +1,6 @@
+<script>
+  window.image_path = "/images/"
+</script>
 <div id="gamePage" class="row">
   <div id="game">
   </div>

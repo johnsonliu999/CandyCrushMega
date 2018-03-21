@@ -16,18 +16,20 @@ const ChatRoom = ({messages, userId, channel}) => {
             <span>{cur.content}</span>
           </li>)}
       </ul>
-      <input id="chatInput"/>
-      <button className="btn btn-primary" onClick={
-          () => {
-            let chatInput = $('#chatInput');
-            let content = chatInput.val().trim();
-            if (content)
-              channel.push("message", {user_id: userId, content: content})
-            chatInput.val("");
-          }
-        }>
-        Send
-      </button>
+      <div class="chat-input">
+        <input id="chatInput"/>
+        <button className="btn btn-primary" onClick={
+            () => {
+              let chatInput = $('#chatInput');
+              let content = chatInput.val().trim();
+              if (content)
+                channel.push("message", {user_id: userId, content: content})
+              chatInput.val("");
+            }
+          }>
+          Send
+        </button>
+      </div>
     </div>
   );
 };

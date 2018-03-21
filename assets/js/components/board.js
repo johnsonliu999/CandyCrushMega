@@ -7,15 +7,15 @@ export default class Board extends Component {
     const disp = [];
     const matched_set = new Set(matched);
     for (let i = 0; i < size * size; i++) {
-      let className = "col";
+      let className = "rounded col-" + (12 / size);
       if (matched_set.has(i)) className += " bg-success";
       if (i == index1 || i == index2) className += " bg-info";
       disp.push(
-        <button key={i}
+        <input  type="image"
+                src={window.image_path + board[i] + ".svg"}
+                key={i}
                 className={className}
-                onClick={() => handleClick(i)}>
-        {board[i]}
-        </button>)
+                onClick={() => handleClick(i)} />)
       if (i % size == size-1)
         disp.push(<div key={`b${i}`} className="w-100" />);
     }

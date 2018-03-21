@@ -1,11 +1,11 @@
 defmodule CandyCrushMega.Game do
   use Agent, restart: :temporary
 
-  @size 9
-  @red "*"
-  @blue "/"
-  @green "+"
-  @yellow "-"
+  @size 6
+  @red "pikachu"
+  @blue "charmander"
+  @green "squirtle"
+  @yellow "bulbasaur"
   @tiles [@blue, @green, @yellow, @red]
 
   @goal 50

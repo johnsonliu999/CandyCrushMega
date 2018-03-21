@@ -2,7 +2,7 @@ import React from 'react';
 
 const States = ({valid, sp_mode, player, opponent, goal}) =>
 (<div className={"row states"}>
-<div className={"col rounded " + (valid ? "border border-primary" : "")}>
+<div className={"user-state col rounded " + (valid ? "border border-primary" : "")}>
   <p>
     <span>{sp_mode ? "Player1 # " : "Your # : "}</span>
     <span>{player.id}</span>
@@ -15,7 +15,7 @@ const States = ({valid, sp_mode, player, opponent, goal}) =>
   </div>
 </div>
 
-<div className={"col rounded " + (!valid ? "border border-primary" : "")}>
+<div className={"user-state col rounded " + (!valid ? "border border-primary" : "")}>
   <p>
     <span>{sp_mode ? "Player2 # " : "Opponent # : "}</span>
     <span>{opponent.id}</span>

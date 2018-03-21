@@ -8,8 +8,8 @@
     <meta name="author" content="">
 
     <title>Hello CandyCrushMega!</title>
+    <link href="https://fonts.googleapis.com/css?family=Limelight" rel="stylesheet">
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
-
     <script>
       window.userToken = "TODO";
     </script>

@@ -1,7 +1,8 @@
-<h1>Welcome to Candy Crush Mega!</h1>
 
-<div id="indexPage">
-  <label for="gameName">Game Name</label>
-  <input id="gameName" />
-  <button id="gameJoinBtn">Join Now</button>
-</div>
+<center id="indexPage" class="align-middle">
+  <h1 style="font-family: 'Limelight', cursive;" class="text-primary">Pokemon Crush</h1>
+  <div>
+    <input id="gameName" placeholder="Enter game name" />
+    <button id="gameJoinBtn" class="btn btn-primary">Join Now</button>
+  </div>
+</center>

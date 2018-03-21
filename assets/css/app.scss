@@ -1,6 +1,15 @@
 /* This file is for your main application css. */
 @import "bootstrap";
 
-.tile {
-  width:5em;
+.user-state {
+  padding: 0.5em;
+}
+
+.chat-room {
+  height: 100%;
+}
+
+.chat-input {
+  position: absolute;
+  bottom: 0;
 }
