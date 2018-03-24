@@ -5,11 +5,11 @@ defmodule CandyCrushMegaWeb.GameChannel do
 
   def join("game:" <> game_name, payload, socket) do
     if authorized?(payload) do
-      socket = assign(socket, :game_name, game_name)
+      socket = socket |> assign(:game_name, game_name)
       if :global.whereis_name({:game, game_name}) == :undefined do
         DynamicSupervisor.start_child(GameSupervisor, {Game, game_name})
       end
-      {role, game} = Game.join(Game.get(game_name), socket.assigns.user_id)
+      {role, game} = Game.join(Game.get(game_name), socket.assigns.user_id, payload["user_name"])
       user_id = socket.assigns.user_id
       Game.update(game_name, game)
       case role do
@@ -119,12 +119,14 @@ defmodule CandyCrushMegaWeb.GameChannel do
   def terminate({:shutdown, reason}, socket) do
     user_id = socket.assigns.user_id
     game_name = socket.assigns.game_name
-    game = Game.get(game_name)
-    if user_id == game.player1.id || user_id == game.player2.id do
-      Game.destroy(game_name)
-      broadcast socket, "game_over", %{reason: "Player left"}
-      {:stop, :normal, socket}
+    if :global.whereis_name({:game, game_name}) != :undefined do
+      game = Game.get(game_name)
+      if user_id == game.player1.id || user_id == game.player2.id do
+        Game.destroy(game_name)
+        broadcast socket, "player_left", %{}
+      end
     end
+    {:stop, :normal, socket}
   end
 
   # Add authorization logic here as required.

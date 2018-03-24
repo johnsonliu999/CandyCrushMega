@@ -4,17 +4,17 @@ import States from './states'
 import ChatRoom from './chat-room'
 
 const WinnerModal = () => (
-  <div className="modal fade" id="winnerModal"
+  <div className="modal fade" data-backdrop="static" id="modal"
     tabIndex="-1" role="dialog">
     <div className="modal-dialog" role="document">
       <div className="modal-content">
         <div className="modal-header">
           <h5 className="modal-title">Game Over</h5>
-          <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+          <button id="modalClose" type="button" className="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div className="modal-body" id="winnerModalBody">
+        <div className="modal-body" id="modalBody">
         </div>
       </div>
     </div>
@@ -40,18 +40,19 @@ export default class Game extends Component {
       index2: null,
       matched: null
     }
-
     this._initGame = this._initGame.bind(this);
     this._updateGame = this._updateGame.bind(this);
     this.handleClick = this.handleClick.bind(this);
+
   }
 
   componentDidMount() {
+
     // TODO: join channel
     const url = window.location.href;
     const gameName = url.substr(url.lastIndexOf('/')+1);
     const topic = `game:${gameName}`;
-    const channel = this.props.socket.channel(topic);
+    const channel = this.props.socket.channel(topic, {user_name: sessionStorage.getItem("user_name")});
     this.setState({channel:channel});
 
     channel.on("player2_join", data => this._initGame(data.game));
@@ -81,12 +82,31 @@ export default class Game extends Component {
       if (data.cur_player == this.state.userId) this.setState({valid:true});
     });
     channel.on("game_over", data => {
+      const {player1, player2, userId} = this.state;
+      const [id1, id2] = [player1.id, player2.id];
       this.setState({winner: data.winner, valid: false});
-      const content = "You " + (this.state.userId == data.winner ? "win" : "lose")
+      let content = "You " + (userId == data.winner ? "win" : "lose")
                       + " the game.";
-      $('#winnerModalBody').text(content);
-      $('#winnerModal').modal();
+      if (userId != id1 && userId != id2)
+        content = "Player " + (id1 == data.winner ? player1.user_name : player2.user_name)
+                   + " wins the game.";
 
+      $("#modalClose").click(() => {
+        console.log("Close clicked");
+        window.location.href = window.location.origin;
+      });
+      $('#modalBody').text(content);
+      $('#modal').modal();
+
+    });
+
+    channel.on("player_left", () => {
+      $("#modalClose").click(() => {
+        console.log("Close clicked");
+        window.location.href = window.location.origin;
+      });
+      $('#modalBody').text("Player left, redirecting to index page...");
+      $('#modal').modal();
     });
 
     channel.join()

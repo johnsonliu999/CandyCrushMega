@@ -4,8 +4,8 @@ const States = ({valid, sp_mode, player, opponent, goal}) =>
 (<div className={"row states"}>
 <div className={"user-state col rounded " + (valid ? "border border-primary" : "")}>
   <p>
-    <span>{sp_mode ? "Player1 # " : "Your # : "}</span>
-    <span>{player.id}</span>
+    <span>{sp_mode ? "Player1: " : "Current Player: "}</span>
+    <span>{player.name + " (id: " + player.id + ')'}</span>
   </p>
   <div className={"progress"}>
     <div className={"progress-bar bg-success"}
@@ -17,8 +17,8 @@ const States = ({valid, sp_mode, player, opponent, goal}) =>
 
 <div className={"user-state col rounded " + (!valid ? "border border-primary" : "")}>
   <p>
-    <span>{sp_mode ? "Player2 # " : "Opponent # : "}</span>
-    <span>{opponent.id}</span>
+    <span>{sp_mode ? "Player2: " : "Opponent: "}</span>
+    <span>{opponent.name + " (id: " +  opponent.id + ')'}</span>
   </p>
   <div className={"progress"}>
     <div className={"progress-bar bg-danger"}

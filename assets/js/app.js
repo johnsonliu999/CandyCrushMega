@@ -40,12 +40,14 @@ function init() {
 }
 
 function indexInit() {
-  $('#gameJoinBtn').click( () => {
-    const gameName = $('#gameName').val();
-    if (gameName) {
-      window.location.href="/game/"+gameName;
-    }
-  })
+
+  $('#gameForm').submit((e) => {
+    e.preventDefault();
+    const game_name = $('#gameName').val();
+    sessionStorage.setItem("user_name", $('#userName').val());
+
+    window.location.href="/game/"+game_name;
+  });
 }
 
 function gameInit() {

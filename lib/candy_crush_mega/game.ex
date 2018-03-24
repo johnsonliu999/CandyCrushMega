@@ -17,7 +17,7 @@ defmodule CandyCrushMega.Game do
     cur_player: nil, # ids or token
     player1: nil, # %{id: :id(), score: :int()}
     player2: nil,
-    spectators: [], # ids
+    spectators: [], # {id: int(), name: string()}
     over: false,
     board: %{}, # %{index => '*'}
     messages: [] # list of {id, msg}
@@ -51,14 +51,14 @@ defmodule CandyCrushMega.Game do
   # simply add user_id per the game
   # however, if p2, then create new board
   # return {:stateus(), :game()}
-  def join(game, user_id) do
+  def join(game, user_id, user_name) do
     cond do
-      !game.player1 -> {:player1, %{game | player1: %{id: user_id, score: 0}}}
+      !game.player1 -> {:player1, %{game | player1: %{id: user_id, name: user_name, score: 0}}}
       !game.player2 -> {:player2, game
-        |> Map.put(:player2, %{id: user_id, score: 0})
+        |> Map.put(:player2, %{id: user_id, name: user_name, score: 0})
         |> Map.put(:board, new_board)
         |> Map.put(:cur_player, game.player1.id)}
-      true -> {:spectator, %{game | spectators: [user_id | game.spectators]}}
+      true -> {:spectator, %{game | spectators: [%{id: user_id, name: user_name}| game.spectators]}}
     end
   end
 

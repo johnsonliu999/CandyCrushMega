@@ -16,7 +16,7 @@ const ChatRoom = ({messages, userId, channel}) => {
             <span>{cur.content}</span>
           </li>)}
       </ul>
-      <div class="chat-input">
+      <div className="chat-input">
         <input id="chatInput"/>
         <button className="btn btn-primary" onClick={
             () => {
