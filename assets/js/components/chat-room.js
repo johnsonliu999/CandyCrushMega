@@ -7,28 +7,30 @@ const ChatRoom = ({messages, userId, channel}) => {
 
   return (
     <div className="chat-room">
-      <ul>
+      <div className="m-1 chat-input input-group">
+        <input id="chatInput" className="form-control"/>
+        <div className="input-group-append">
+          <button className="btn btn-primary" onClick={
+              () => {
+                let chatInput = $('#chatInput');
+                let content = chatInput.val().trim();
+                if (content)
+                channel.push("message", {user_id: userId, content: content})
+                chatInput.val("");
+              }
+            }>
+            Send
+          </button>
+        </div>
+      </div>
+      <div className="messages">
         {msgs.map( (cur, i) =>
-          <li key={i}>
-            <span className={"rounded text-white bg-"+ (kinds[cur.user_id % kinds.length])}>
+          <p key={i}>
+            <span className={"p-1 m-2 rounded text-white bg-"+ (kinds[cur.user_id % kinds.length])}>
               User {cur.user_id}
             </span>
             <span>{cur.content}</span>
-          </li>)}
-      </ul>
-      <div className="chat-input">
-        <input id="chatInput"/>
-        <button className="btn btn-primary" onClick={
-            () => {
-              let chatInput = $('#chatInput');
-              let content = chatInput.val().trim();
-              if (content)
-                channel.push("message", {user_id: userId, content: content})
-              chatInput.val("");
-            }
-          }>
-          Send
-        </button>
+          </p>)}
       </div>
     </div>
   );
